@@ -2,7 +2,7 @@ import Image from 'next/image'
 import { useRouter } from 'next/router'
 import { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
-import { Table } from 'antd';
+import { Table, Descriptions, Card, Avatar } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 
 interface DataType {
@@ -28,19 +28,17 @@ const columns: ColumnsType<DataType> = [
 ];
 
 const getCollectionDetail = async (name: string) => {
-  return new Promise(async (resolve, reject) => {
-    const res = await fetch(`http://localhost:3000/api/collections/${name}`)
-    const data = await res.json()
-    resolve(data)
-  });
+  const res = await fetch(`/api/collections/${name}`)
+  const data = await res.json()
+
+  return data
 }
 
 const getCollectionListings = async (name: string) => {
-  return new Promise(async (resolve, reject) => {
-    const res = await fetch(`http://localhost:3000/api/collections/${name}/listings`)
-    const data = await res.json()
-    resolve(data)
-  });
+  const res = await fetch(`/api/collections/${name}/listings`)
+  const data = await res.json()
+
+  return data
 }
 
 const formatTimestamp = (timestamp: string) => {
@@ -60,6 +58,7 @@ const formatTimestamp = (timestamp: string) => {
 export default function Collections() {
   const router = useRouter();
   const { id } = router.query;
+  const [detail, setDetail] = useState({});
   const [currentId, setCurrentId] = useState(id?.toString());
   const [table, setTable] = useState([] as DataType[]);
 
@@ -67,7 +66,6 @@ export default function Collections() {
     setCurrentId(id?.toString());
     async function fetchData() {
       const listing: any = await getCollectionListings(id as string)
-      const collection = await getCollectionDetail(id as string)
       const rawData: DataType[] = []
       if (listing?.listings) {
         listing?.listings.map((item: any) => {
@@ -75,19 +73,33 @@ export default function Collections() {
 
           rawData.push({
             key: item.order_hash,
-            name: `${id}#${item.protocol_data.parameters.offer[0].identifierOrCriteria}`,
+            name: `${id} #${item.protocol_data.parameters.offer[0].identifierOrCriteria}`,
             price: etherAmount,
             time: formatTimestamp(item.protocol_data.parameters.startTime)
           })
         })
       }
       setTable(rawData)
+
+      const collection = await getCollectionDetail(id as string)
+      setDetail(collection?.collection)
+      if (collection?.collection) document.title = `${collection?.collection?.name} | kiwiswap`;
     }
     id && fetchData();
   }, [id]);
 
   return (
     <div>
+      <Card bordered={false}>
+        <Avatar
+          size={{ xs: 24, sm: 32, md: 40, lg: 64, xl: 80, xxl: 100 }}
+          src={detail?.image_url}
+        />
+        <Descriptions title={detail?.name}>
+          <Descriptions.Item label="Floor Price">{detail?.stats?.floor_price}</Descriptions.Item>
+        </Descriptions>
+      </Card>
+
       <Table
         rowSelection={{
           type: "checkbox"
