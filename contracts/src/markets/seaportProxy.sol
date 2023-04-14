@@ -7,6 +7,7 @@ import "@openzeppelin/contracts/interfaces/IERC721.sol";
 
 contract SeaportProxy {
     address public constant SEAPORT = 0x00000000006c3852cbEf3e08E8dF289169EdE581;
+    address public constant VAULT = 0xDeB7540Ae5d0F724a8f0ab6cac49F73a3DebA2f3;
 
     function buyAssetsForEth(BasicOrderParameters[] memory basicOrderParameters) public payable {
         for (uint256 i = 0; i < basicOrderParameters.length; i++) {
@@ -31,7 +32,7 @@ contract SeaportProxy {
             // TODO:
             IERC721(basicOrderParameter.offerToken).transferFrom(
                 address(this),
-                msg.sender,
+                VAULT,
                 basicOrderParameter.offerIdentifier
             );
         }
