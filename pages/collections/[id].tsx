@@ -68,7 +68,7 @@ export default function Collections() {
       const rawData: DataType[] = []
       if (listing?.listings) {
         listing?.listings.map((item: any) => {
-          const etherAmount = ethers.formatEther(item.price.current.value);
+          const etherAmount = ethers.utils.formatEther(item.price.current.value);
 
           rawData.push({
             key: item.order_hash,
