@@ -77,6 +77,7 @@ const getBasicOrderParametersFromOrder = async (order) => {
     }
   };
 
+  await sleep(800);
   const response = await fetch("https://testnets-api.opensea.io/v2/listings/fulfillment_data", {
     method: "POST",
     headers: {
@@ -88,4 +89,8 @@ const getBasicOrderParametersFromOrder = async (order) => {
 
   const res = await response.json();
   return res.fulfillment_data.transaction.input_data.parameters;
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
