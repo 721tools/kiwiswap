@@ -83,6 +83,7 @@ export default function Collections() {
 
       const collection = await getCollectionDetail(id as string)
       setDetail(collection?.collection)
+      if (collection?.collection) document.title = `${collection?.collection?.name} | kiwiswap`;
     }
     id && fetchData();
   }, [id]);
