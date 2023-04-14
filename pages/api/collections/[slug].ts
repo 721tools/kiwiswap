@@ -8,11 +8,8 @@ export default async function handler(
   res: NextApiResponse<any>
 ) {
   const { slug } = req.query
-  const response = await fetch(`https://testnets-api.opensea.io/api/v1/collection/${slug}?format=json`, {
+  const response = await fetch(`https://testnets-api.opensea.io/api/v1/collection/${slug}`, {
     method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-    },
   })
   const json = await response.json();
   res.status(200).json(json)
