@@ -1,11 +1,12 @@
 import { useRouter } from 'next/router'
 import { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
-import { Table, Descriptions, Card, Avatar, Skeleton } from 'antd';
+import { Table, Descriptions, Card, Avatar, Skeleton, Button } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 
 interface DataType {
   key: React.Key;
+  id: string;
   img: string;
   name: string;
   price: string;
@@ -47,6 +48,31 @@ const getCollectionListings = async (address: string) => {
   return data
 }
 
+const postCollectionListings = async (address, array) => {
+  const data = {
+    contract_address: address,
+    tokens: []
+  };
+  array.map(item => {
+    data.tokens.push({
+      token_id: item.id,
+      price: item.price,
+      "platform": 0
+    })
+  })
+
+  fetch('/api/orders/sweep', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(data)
+  })
+    .then(response => response.text())
+    .then(data => console.log(data))
+    .catch(error => console.error(error));
+}
+
 const formatTimestamp = (timestamp: string) => {
   const date = new Date(parseInt(timestamp) * 1000);
 
@@ -69,8 +95,21 @@ export default function Collections() {
   const router = useRouter();
   const { id } = router.query;
   const [detail, setDetail] = useState({});
+  const [address, setAddress] = useState("");
+  const [select, setSelect] = useState([]);
   const [currentId, setCurrentId] = useState(id?.toString());
   const [table, setTable] = useState([] as DataType[]);
+
+  const rowSelection = {
+    onChange: (selectedRowKeys: React.Key[], selectedRows: DataType[]) => {
+      setSelect(selectedRows)
+      console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+    },
+    getCheckboxProps: (record: DataType) => ({
+      disabled: record.name === 'Disabled User', // Column configuration not to be checked
+      name: record.name,
+    }),
+  };
 
   useEffect(() => {
     setCurrentId(id?.toString());
@@ -78,6 +117,7 @@ export default function Collections() {
       const collection = await getCollectionDetail(id as string)
       setDetail(collection?.collection)
       if (collection?.collection) document.title = `${collection?.collection?.name} | kiwiswap`;
+      setAddress(collection?.collection.primary_asset_contracts[0].address as string)
 
       await sleep(1000);
 
@@ -89,6 +129,7 @@ export default function Collections() {
 
           rawData.push({
             key: item.order_hash,
+            id: item.protocol_data.parameters.offer[0].identifierOrCriteria,
             img: item.maker.profile_img_url,
             name: `${id} #${item.protocol_data.parameters.offer[0].identifierOrCriteria}`,
             price: etherAmount,
@@ -105,6 +146,9 @@ export default function Collections() {
 
   return (
     <div className="w-11/12 m-auto">
+      <Button type="primary" disabled={!select || select.length <= 0} size="large" onClick={() => postCollectionListings(address, select)}>
+        BUY
+      </Button>
       {detail?.name
         ? <Card bordered={false}>
           <Avatar
@@ -122,7 +166,8 @@ export default function Collections() {
       <Table
         className="bg-white mt-5"
         rowSelection={{
-          type: "checkbox"
+          type: "checkbox",
+          ...rowSelection,
         }}
         columns={columns}
         dataSource={table}
