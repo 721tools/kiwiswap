@@ -29,12 +29,13 @@ contract SeaportProxy {
         (bool success, ) = SEAPORT.call{value: _price}(_data);
 
         if (success) {
-            // TODO:
             IERC721(basicOrderParameter.offerToken).transferFrom(
                 address(this),
                 VAULT,
                 basicOrderParameter.offerIdentifier
             );
+
+            // TODO: send
         }
     }
 }
