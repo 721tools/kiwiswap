@@ -12,7 +12,6 @@ export default async function handler(
   for (const token of Array.from({ length: 10 }, (_, i) => i)) {
     requestUrl = requestUrl + "&token_ids=" + token;
   }
-  console.log(requestUrl)
   const response = await fetch(requestUrl, {
     method: 'GET',
     headers: {
