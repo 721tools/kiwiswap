@@ -1,8 +1,7 @@
-import Image from 'next/image'
 import { useRouter } from 'next/router'
 import { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
-import { Table, Descriptions, Card, Avatar } from 'antd';
+import { Table, Descriptions, Card, Avatar, Skeleton } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 
 interface DataType {
@@ -89,18 +88,23 @@ export default function Collections() {
   }, [id]);
 
   return (
-    <div>
-      <Card bordered={false}>
-        <Avatar
-          size={{ xs: 24, sm: 32, md: 40, lg: 64, xl: 80, xxl: 100 }}
-          src={detail?.image_url}
-        />
-        <Descriptions title={detail?.name}>
-          <Descriptions.Item label="Floor Price">{detail?.stats?.floor_price}</Descriptions.Item>
-        </Descriptions>
-      </Card>
+    <div className="w-11/12 m-auto">
+      {detail?.name
+        ? <Card bordered={false}>
+          <Avatar
+            size={{ xs: 24, sm: 32, md: 40, lg: 64, xl: 80, xxl: 100 }}
+            src={detail?.image_url}
+          />
+          <Descriptions title={detail?.name}>
+            <Descriptions.Item label="Floor Price">{detail?.stats?.floor_price}</Descriptions.Item>
+          </Descriptions>
+        </Card>
+        : <div className="bg-white p-5">
+          <Skeleton active />
+        </div>}
 
       <Table
+        className="mt-5"
         rowSelection={{
           type: "checkbox"
         }}
