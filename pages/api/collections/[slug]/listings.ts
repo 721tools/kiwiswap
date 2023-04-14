@@ -19,5 +19,5 @@ export default async function handler(
     },
   })
   const json = await response.json();
-  res.status(200).json(json.orders)
+  res.status(200).json(json)
 }

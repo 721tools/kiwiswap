@@ -6,12 +6,19 @@ import type { ColumnsType } from 'antd/es/table';
 
 interface DataType {
   key: React.Key;
+  img: string;
   name: string;
   price: string;
   time: string;
 }
 
 const columns: ColumnsType<DataType> = [
+  {
+    title: '',
+    dataIndex: 'img',
+    width: 100,
+    render: (src: string) => <Avatar shape="square" size={64} src={src} />,
+  },
   {
     title: 'Name',
     dataIndex: 'name'
@@ -33,8 +40,8 @@ const getCollectionDetail = async (name: string) => {
   return data
 }
 
-const getCollectionListings = async (name: string) => {
-  const res = await fetch(`/api/collections/${name}/listings`)
+const getCollectionListings = async (address: string) => {
+  const res = await fetch(`/api/collections/${address}/listings`)
   const data = await res.json()
 
   return data
@@ -54,6 +61,10 @@ const formatTimestamp = (timestamp: string) => {
   return formattedTime
 }
 
+const sleep = (ms) => {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 export default function Collections() {
   const router = useRouter();
   const { id } = router.query;
@@ -64,14 +75,21 @@ export default function Collections() {
   useEffect(() => {
     setCurrentId(id?.toString());
     async function fetchData() {
-      const listing: any = await getCollectionListings(id as string)
+      const collection = await getCollectionDetail(id as string)
+      setDetail(collection?.collection)
+      if (collection?.collection) document.title = `${collection?.collection?.name} | kiwiswap`;
+
+      await sleep(1000);
+
+      const listing: any = await getCollectionListings(collection?.collection.primary_asset_contracts[0].address as string)
       const rawData: DataType[] = []
-      if (listing?.listings) {
-        listing?.listings.map((item: any) => {
-          const etherAmount = ethers.utils.formatEther(item.price.current.value);
+      if (listing?.orders) {
+        listing?.orders.map((item: any) => {
+          const etherAmount = ethers.utils.formatEther(item.current_price);
 
           rawData.push({
             key: item.order_hash,
+            img: item.maker.profile_img_url,
             name: `${id} #${item.protocol_data.parameters.offer[0].identifierOrCriteria}`,
             price: etherAmount,
             time: formatTimestamp(item.protocol_data.parameters.startTime)
@@ -80,12 +98,7 @@ export default function Collections() {
       }
       setTable(rawData.sort((a, b) => {
         return ethers.utils.parseEther(a.price).lt(ethers.utils.parseEther(b.price)) ? -1 : 1;
-      }
-      ))
-
-      const collection = await getCollectionDetail(id as string)
-      setDetail(collection?.collection)
-      if (collection?.collection) document.title = `${collection?.collection?.name} | kiwiswap`;
+      }))
     }
     id && fetchData();
   }, [id]);
