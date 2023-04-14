@@ -78,7 +78,10 @@ export default function Collections() {
           })
         })
       }
-      setTable(rawData)
+      setTable(rawData.sort((a, b) => {
+        return ethers.utils.parseEther(a.price).lt(ethers.utils.parseEther(b.price)) ? -1 : 1;
+      }
+      ))
 
       const collection = await getCollectionDetail(id as string)
       setDetail(collection?.collection)
@@ -104,7 +107,7 @@ export default function Collections() {
         </div>}
 
       <Table
-        className="mt-5"
+        className="bg-white mt-5"
         rowSelection={{
           type: "checkbox"
         }}
