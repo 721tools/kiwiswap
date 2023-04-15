@@ -11,3 +11,6 @@
 [submodule "contracts/lib/seaport"]
 	path = contracts/lib/seaport
 	url = https://github.com/ProjectOpenSea/seaport
+[submodule "contracts/lib/LayerZero"]
+	path = contracts/lib/LayerZero
+	url = https://github.com/LayerZero-Labs/LayerZero
