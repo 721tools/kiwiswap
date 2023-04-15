@@ -3,7 +3,8 @@ import { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
 import { Table, Descriptions, Card, Avatar, Skeleton, Button } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import Image from 'next/image'
+import Image from 'next/image';
+import useWalletAddress from '../../hooks/useWalletAddress';
 
 interface DataType {
   key: React.Key;
@@ -86,10 +87,11 @@ export default function Collections() {
   const { id } = router.query;
   const [detail, setDetail] = useState({} as any);
   const [address, setAddress] = useState<string>("");
-  const [wallet, setWallet] = useState<string>("");
   const [select, setSelect] = useState([]);
   const [table, setTable] = useState<DataType[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+
+  const wallet = useWalletAddress();
 
   const postCollectionListings = async (address, array) => {
     setLoading(true)
@@ -144,21 +146,6 @@ export default function Collections() {
     }),
   };
 
-  const connectWallet = async () => {
-    if (window.ethereum) {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-
-      await window.ethereum.request({ method: 'eth_requestAccounts' });
-
-      const signer = provider.getSigner();
-      const address = await signer.getAddress();
-      setWallet(address);
-      console.log(`Connected to MetaMask wallet with address ${address}`);
-    } else {
-      console.log('MetaMask wallet not detected');
-    }
-  }
-
   useEffect(() => {
     async function fetchData() {
       const collection = await getCollectionDetail(id as string)
@@ -194,9 +181,7 @@ export default function Collections() {
   return (
     <div className="w-11/12 m-auto">
       <div className="flex justify-end mb-3">
-        <Button type="primary" size="large"
-          onClick={() => connectWallet()}
-        >
+        <Button type="primary" size="large">
           {wallet ? displayName(wallet) : "Connect Your Wallet"}
         </Button>
       </div>

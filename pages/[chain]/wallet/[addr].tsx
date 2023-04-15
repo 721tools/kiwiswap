@@ -39,7 +39,7 @@ export default function Wallet() {
   const [select, setSelect] = useState([]);
   const [table, setTable] = useState([] as DataType[]);
 
-  const address = useWalletAddress();
+  const wallet = useWalletAddress();
 
   const displayName = name => {
     if (!name) {
@@ -75,17 +75,17 @@ export default function Wallet() {
       }
       setTable(rawData)
     }
-    address && fetchData();
-  }, [address]);
+    wallet && fetchData();
+  }, [wallet]);
 
   return (
     <div className="w-11/12 m-auto">
       <div className="flex justify-end mb-3">
         <Button type="primary" size="large">
-          {address ? displayName(address) : "Connect Your Wallet"}
+          {wallet ? displayName(wallet) : "Connect Your Wallet"}
         </Button>
       </div>
-      {address
+      {wallet
         ? <Card bordered={false}>
           <Skeleton active />
           {/* <Avatar
