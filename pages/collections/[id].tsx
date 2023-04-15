@@ -56,46 +56,6 @@ const getCollectionListings = async (address: string) => {
   return data
 }
 
-const postCollectionListings = async (address, array) => {
-  const body = {
-    contract_address: address,
-    tokens: []
-  };
-  array.map(item => {
-    body.tokens.push({
-      token_id: item.id,
-      price: item.price,
-      "platform": 0
-    })
-  })
-
-  const res = await fetch('/api/orders/sweep', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(body)
-  })
-  const data = await res.json()
-
-  try {
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const signer = provider.getSigner();
-
-    const transaction = {
-      to: data.address,
-      data: data.calldata,
-      value: data.value
-    };
-
-    const txResponse = await signer.sendTransaction(transaction);
-    const txReceipt = await txResponse.wait();
-    console.log('Transaction receipt:', txReceipt);
-  } catch (error) {
-    console.log(error);
-  }
-}
-
 const displayName = name => {
   if (!name) {
     return 'Anonymous'
@@ -125,11 +85,54 @@ export default function Collections() {
   const router = useRouter();
   const { id } = router.query;
   const [detail, setDetail] = useState({} as any);
-  const [address, setAddress] = useState("");
-  const [wallet, setWallet] = useState("");
+  const [address, setAddress] = useState<string>("");
+  const [wallet, setWallet] = useState<string>("");
   const [select, setSelect] = useState([]);
-  const [currentId, setCurrentId] = useState(id?.toString());
-  const [table, setTable] = useState([] as DataType[]);
+  const [table, setTable] = useState<DataType[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+
+  const postCollectionListings = async (address, array) => {
+    setLoading(true)
+    const body = {
+      contract_address: address,
+      tokens: []
+    };
+    array.map(item => {
+      body.tokens.push({
+        token_id: item.id,
+        price: item.price,
+        "platform": 0
+      })
+    })
+
+    const res = await fetch('/api/orders/sweep', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body)
+    })
+    const data = await res.json()
+
+    try {
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+
+      const transaction = {
+        to: data.address,
+        data: data.calldata,
+        value: data.value
+      };
+
+      const txResponse = await signer.sendTransaction(transaction);
+      const txReceipt = await txResponse.wait();
+      console.log('Transaction receipt:', txReceipt);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const rowSelection = {
     onChange: (selectedRowKeys: React.Key[], selectedRows: DataType[]) => {
@@ -157,7 +160,6 @@ export default function Collections() {
   }
 
   useEffect(() => {
-    setCurrentId(id as string);
     async function fetchData() {
       const collection = await getCollectionDetail(id as string)
       setDetail(collection?.collection)
@@ -223,7 +225,7 @@ export default function Collections() {
           columns={columns}
           dataSource={table}
         />
-        <Button className="absolute bottom-3 left-3" type="primary" disabled={!select || select.length <= 0} size="large" onClick={() => postCollectionListings(address, select)}>
+        <Button loading={loading} className="absolute bottom-3 left-3" type="primary" disabled={!select || select.length <= 0} size="large" onClick={() => postCollectionListings(address, select)}>
           BUY
         </Button>
       </div>
