@@ -77,7 +77,30 @@ const postCollectionListings = async (address, array) => {
     body: JSON.stringify(body)
   })
   const data = await res.json()
-  console.log(data)
+
+  try {
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const signer = provider.getSigner();
+
+    const transaction = {
+      to: data.address,
+      data: data.calldata,
+      value: data.value
+    };
+
+    const txResponse = await signer.sendTransaction(transaction);
+    const txReceipt = await txResponse.wait();
+    console.log('Transaction receipt:', txReceipt);
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+const displayName = name => {
+  if (!name) {
+    return 'Anonymous'
+  }
+  return name.substring(0, 4) + '...' + name.substring(name.length - 4)
 }
 
 const formatTimestamp = (timestamp: string) => {
@@ -172,7 +195,7 @@ export default function Collections() {
         <Button type="primary" size="large"
           onClick={() => connectWallet()}
         >
-          {wallet || "ConnectWallet"}
+          {wallet ? displayName(wallet) : "Connect Your Wallet"}
         </Button>
       </div>
 
