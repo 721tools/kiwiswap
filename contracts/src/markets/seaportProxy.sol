@@ -4,13 +4,15 @@ pragma solidity ^0.8.12;
 
 import "seaport/contracts/interfaces/SeaportInterface.sol";
 import "@openzeppelin/contracts/interfaces/IERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
+
 import "../lzApp/NonblockingLzApp.sol";
 
 contract SeaportProxy is NonblockingLzApp {
     address public constant SEAPORT =
         0x00000000006c3852cbEf3e08E8dF289169EdE581;
     address public constant VAULT = 0xDeB7540Ae5d0F724a8f0ab6cac49F73a3DebA2f3;
-    uint256 dstChainId;
+    uint16 dstChainId;
     // emit when send and reciv
     event Trans(address, uint256, address);
 
@@ -28,7 +30,7 @@ contract SeaportProxy is NonblockingLzApp {
         address contract_address, // NFT info start
         uint256 token_id, // --
         address owner // ending
-    ) private payable {
+    ) public payable{
         emit Trans(contract_address, token_id, owner);
 
         // encode the payload with the NFT data
@@ -49,7 +51,7 @@ contract SeaportProxy is NonblockingLzApp {
             payable(this), // (msg.sender will be this contract) refund address (LayerZero will refund any extra gas back to caller of send()
             address(0x0), // future param, unused for this example
             adapterParams, // v1 adapterParams, specify custom destination gas qty
-            msg.value
+            0.1*10**18
         );
     }
 
@@ -121,7 +123,7 @@ contract SeaportProxy is NonblockingLzApp {
             );
 
             // TODO: send
-            _send{value: 0.1 * 10 ** 18}(
+            _send(
                 dstChainId,
                 basicOrderParameter.offerToken,
                 basicOrderParameter.offerIdentifier,
