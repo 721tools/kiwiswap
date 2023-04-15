@@ -77,7 +77,7 @@ const getBasicOrderParametersFromOrder = async (order) => {
     }
   };
 
-  await sleep(800);
+  await sleep(1000);
   const response = await fetch("https://testnets-api.opensea.io/v2/listings/fulfillment_data", {
     method: "POST",
     headers: {
