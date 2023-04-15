@@ -162,11 +162,11 @@ export default function Collections() {
       const collection = await getCollectionDetail(id as string)
       setDetail(collection?.collection)
       if (collection?.collection) document.title = `${collection?.collection?.name} | kiwiswap`;
-      setAddress(collection?.collection.primary_asset_contracts[0].address as string)
+      setAddress(collection?.collection?.primary_asset_contracts[0]?.address as string)
 
       await sleep(1000);
 
-      const listing: any = await getCollectionListings(collection?.collection.primary_asset_contracts[0].address as string)
+      const listing: any = await getCollectionListings(collection?.collection?.primary_asset_contracts[0]?.address as string)
       const rawData: DataType[] = []
       if (listing?.orders) {
         listing?.orders.map((item: any) => {
