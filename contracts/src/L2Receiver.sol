@@ -7,11 +7,13 @@ import "./interfaces/IERC721.sol";
 import "./lzApp/NonblockingLzApp.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 
-
 contract L2Receiver is NonblockingLzApp {
     address public constant SENDER = 0xDeB7540Ae5d0F724a8f0ab6cac49F73a3DebA2f3;
     address public constant L2BAYC = 0xDeB7540Ae5d0F724a8f0ab6cac49F73a3DebA2f3;
     uint256 dstChainId;
+
+    // emit when send and reciv
+    event Trans(address, uint256, address);
 
     // constructor requires the LayerZero endpoint for this chain
     constructor(
