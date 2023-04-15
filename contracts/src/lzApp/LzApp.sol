@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "layerzero/interfaces/ILayerZeroReceiver.sol";
 import "layerzero/interfaces/ILayerZeroUserApplicationConfig.sol";
 import "layerzero/interfaces/ILayerZeroEndpoint.sol";
-import "../util/BytesLib.sol";
+import "../utils/BytesLib.sol";
 
 /*
  * a generic LzReceiver implementation

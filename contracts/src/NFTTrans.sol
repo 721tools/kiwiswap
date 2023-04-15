@@ -16,7 +16,7 @@
 pragma solidity ^0.8.12;
 pragma abicoder v2;
 
-import "lzApp/NonblockingLzApp.sol";
+import "./lzApp/NonblockingLzApp.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 
 contract NFTTrans is NonblockingLzApp {
