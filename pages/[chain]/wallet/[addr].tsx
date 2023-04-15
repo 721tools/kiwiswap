@@ -34,7 +34,6 @@ const getWalletAsset = async (address: string) => {
 export default function Wallet() {
   const router = useRouter();
   const { chain, addr } = router.query;
-  console.log(chain, addr)
 
   const [select, setSelect] = useState([]);
   const [address, setAddress] = useState("");
@@ -43,7 +42,6 @@ export default function Wallet() {
   const rowSelection = {
     onChange: (selectedRowKeys: React.Key[], selectedRows: DataType[]) => {
       setSelect(selectedRows)
-      console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
     },
     getCheckboxProps: (record: DataType) => ({
       disabled: record.name === 'Disabled User', // Column configuration not to be checked
@@ -58,7 +56,7 @@ export default function Wallet() {
 
       const rawData: DataType[] = []
       if (assets?.data) {
-        assets?.data.TokenBalances.TokenBalance.map((item: any) => {
+        assets?.data?.TokenBalances?.TokenBalance.map((item: any) => {
           rawData.push({
             key: item.tokenNfts.tokenId,
             id: item.tokenNfts.tokenId,

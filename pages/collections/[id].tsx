@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
 import { Table, Descriptions, Card, Avatar, Skeleton, Button } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
+import Image from 'next/image'
 
 interface DataType {
   key: React.Key;
@@ -22,7 +23,14 @@ const columns: ColumnsType<DataType> = [
   },
   {
     title: 'Name',
-    dataIndex: 'name'
+    dataIndex: 'name',
+    render: (text: string) => <p style={{ fontWeight: "bold" }}>{text}<Image
+      className="ml-2 inline"
+      src="https://storage.googleapis.com/opensea-static/Logomark/Logomark-Blue.png"
+      alt="Opensea Logo"
+      width={20}
+      height={20}
+    /></p>
   },
   {
     title: 'Price',
@@ -103,7 +111,6 @@ export default function Collections() {
   const rowSelection = {
     onChange: (selectedRowKeys: React.Key[], selectedRows: DataType[]) => {
       setSelect(selectedRows)
-      console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
     },
     getCheckboxProps: (record: DataType) => ({
       disabled: record.name === 'Disabled User', // Column configuration not to be checked
