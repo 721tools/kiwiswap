@@ -100,7 +100,7 @@ export default function Wallet() {
           <Skeleton active />
         </div>}
       <Table
-        className="bg-white mt-5"
+        className="mt-5"
         rowSelection={{
           type: "checkbox",
           ...rowSelection,

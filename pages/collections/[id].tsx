@@ -202,7 +202,7 @@ export default function Collections() {
 
       <div className="relative">
         <Table
-          className="bg-white mt-3"
+          className="mt-3"
           rowSelection={{
             type: "checkbox",
             ...rowSelection,
