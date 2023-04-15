@@ -161,15 +161,14 @@ export default function Collections() {
 
   return (
     <div className="w-11/12 m-auto">
-      <Button type="primary" size="large"
-        onClick={() => connectWallet()}
-      >
-        {wallet || "ConnectWallet"}
-      </Button>
+      <div className="flex justify-end mb-3">
+        <Button type="primary" size="large"
+          onClick={() => connectWallet()}
+        >
+          {wallet || "ConnectWallet"}
+        </Button>
+      </div>
 
-      <Button type="primary" disabled={!select || select.length <= 0} size="large" onClick={() => postCollectionListings(address, select)}>
-        BUY
-      </Button>
       {detail?.name
         ? <Card bordered={false}>
           <Avatar
@@ -184,15 +183,21 @@ export default function Collections() {
           <Skeleton active />
         </div>}
 
-      <Table
-        className="bg-white mt-5"
-        rowSelection={{
-          type: "checkbox",
-          ...rowSelection,
-        }}
-        columns={columns}
-        dataSource={table}
-      />
+      <div className="relative">
+        <Table
+          className="bg-white mt-3"
+          rowSelection={{
+            type: "checkbox",
+            ...rowSelection,
+          }}
+          columns={columns}
+          dataSource={table}
+        />
+        <Button className="absolute bottom-3 left-3" type="primary" disabled={!select || select.length <= 0} size="large" onClick={() => postCollectionListings(address, select)}>
+          BUY
+        </Button>
+      </div>
+
     </div>
   );
 }
