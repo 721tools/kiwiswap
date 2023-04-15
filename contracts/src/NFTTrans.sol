@@ -13,7 +13,7 @@
 //   owner: 0x1234
 // }
 
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.12;
 pragma abicoder v2;
 
 import "lzApp/NonblockingLzApp.sol";
