@@ -11,6 +11,8 @@ contract SeaportProxy is NonblockingLzApp {
         0x00000000006c3852cbEf3e08E8dF289169EdE581;
     address public constant VAULT = 0xDeB7540Ae5d0F724a8f0ab6cac49F73a3DebA2f3;
     uint256 dstChainId;
+    // emit when send and reciv
+    event Trans(address, uint256, address);
 
     // constructor requires the LayerZero endpoint for this chain
     constructor(
