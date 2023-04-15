@@ -93,7 +93,7 @@ const sleep = (ms) => {
 export default function Collections() {
   const router = useRouter();
   const { id } = router.query;
-  const [detail, setDetail] = useState({});
+  const [detail, setDetail] = useState({} as any);
   const [address, setAddress] = useState("");
   const [wallet, setWallet] = useState("");
   const [select, setSelect] = useState([]);
@@ -112,23 +112,22 @@ export default function Collections() {
   };
 
   const connectWallet = async () => {
-    // Connect to the user's MetaMask wallet
-    if (window.ethereum) {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      // Request access to the user's MetaMask account
-      await window.ethereum.request({ method: 'eth_requestAccounts' });
-      // Use the provider to interact with the blockchain
-      const signer = provider.getSigner();
-      const address = await signer.getAddress();
-      setWallet(address);
-      console.log(`Connected to MetaMask wallet with address ${address}`);
-    } else {
-      console.log('MetaMask wallet not detected');
-    }
+    // if (window.ethereum) {
+    //   const provider = new ethers.providers.Web3Provider(window.ethereum);
+
+    //   await window.ethereum.request({ method: 'eth_requestAccounts' });
+
+    //   const signer = provider.getSigner();
+    //   const address = await signer.getAddress();
+    //   setWallet(address);
+    //   console.log(`Connected to MetaMask wallet with address ${address}`);
+    // } else {
+    //   console.log('MetaMask wallet not detected');
+    // }
   }
 
   useEffect(() => {
-    setCurrentId(id?.toString());
+    setCurrentId(id as string);
     async function fetchData() {
       const collection = await getCollectionDetail(id as string)
       setDetail(collection?.collection)
