@@ -18,12 +18,12 @@ contract L2Receiver {
         IERC721Mintable(L2BAYC).mint(destAddress, l1TokenId);
     }
 
-    function sender(uint256 l1TokenId) public {
+    // function sender(uint256 l1TokenId) public {
 
-        IERC721Mintable(L2BAYC).safeTransferFrom(msg.sender, balance(this), l1TokenId);
-        IERC721Mintable(L2BAYC).burn(l1TokenId);
+    //     IERC721Mintable(L2BAYC).safeTransferFrom(msg.sender, balance(this), l1TokenId);
+    //     IERC721Mintable(L2BAYC).burn(l1TokenId);
 
-        //send
-    }
+    //     //send
+    // }
 
 }

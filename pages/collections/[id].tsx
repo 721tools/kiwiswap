@@ -49,28 +49,27 @@ const getCollectionListings = async (address: string) => {
 }
 
 const postCollectionListings = async (address, array) => {
-  const data = {
+  const body = {
     contract_address: address,
     tokens: []
   };
   array.map(item => {
-    data.tokens.push({
+    body.tokens.push({
       token_id: item.id,
       price: item.price,
       "platform": 0
     })
   })
 
-  fetch('/api/orders/sweep', {
+  const res = await fetch('/api/orders/sweep', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify(data)
+    body: JSON.stringify(body)
   })
-    .then(response => response.text())
-    .then(data => console.log(data))
-    .catch(error => console.error(error));
+  const data = await res.json()
+  console.log(data)
 }
 
 const formatTimestamp = (timestamp: string) => {
@@ -94,8 +93,9 @@ const sleep = (ms) => {
 export default function Collections() {
   const router = useRouter();
   const { id } = router.query;
-  const [detail, setDetail] = useState({});
+  const [detail, setDetail] = useState({} as any);
   const [address, setAddress] = useState("");
+  const [wallet, setWallet] = useState("");
   const [select, setSelect] = useState([]);
   const [currentId, setCurrentId] = useState(id?.toString());
   const [table, setTable] = useState([] as DataType[]);
@@ -111,8 +111,23 @@ export default function Collections() {
     }),
   };
 
+  const connectWallet = async () => {
+    if (window.ethereum) {
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+
+      await window.ethereum.request({ method: 'eth_requestAccounts' });
+
+      const signer = provider.getSigner();
+      const address = await signer.getAddress();
+      setWallet(address);
+      console.log(`Connected to MetaMask wallet with address ${address}`);
+    } else {
+      console.log('MetaMask wallet not detected');
+    }
+  }
+
   useEffect(() => {
-    setCurrentId(id?.toString());
+    setCurrentId(id as string);
     async function fetchData() {
       const collection = await getCollectionDetail(id as string)
       setDetail(collection?.collection)
@@ -130,7 +145,7 @@ export default function Collections() {
           rawData.push({
             key: item.order_hash,
             id: item.protocol_data.parameters.offer[0].identifierOrCriteria,
-            img: item.maker.profile_img_url,
+            img: item.maker_asset_bundle.assets[0].image_url,
             name: `${id} #${item.protocol_data.parameters.offer[0].identifierOrCriteria}`,
             price: etherAmount,
             time: formatTimestamp(item.protocol_data.parameters.startTime)
@@ -146,6 +161,12 @@ export default function Collections() {
 
   return (
     <div className="w-11/12 m-auto">
+      <Button type="primary" size="large"
+        onClick={() => connectWallet()}
+      >
+        {wallet || "ConnectWallet"}
+      </Button>
+
       <Button type="primary" disabled={!select || select.length <= 0} size="large" onClick={() => postCollectionListings(address, select)}>
         BUY
       </Button>
