@@ -3,7 +3,8 @@ import { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
 import { Table, Descriptions, Card, Avatar, Skeleton, Button } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import Image from 'next/image'
+import Image from 'next/image';
+import useWalletAddress from '../../hooks/useWalletAddress';
 
 interface DataType {
   key: React.Key;
@@ -56,46 +57,6 @@ const getCollectionListings = async (address: string) => {
   return data
 }
 
-const postCollectionListings = async (address, array) => {
-  const body = {
-    contract_address: address,
-    tokens: []
-  };
-  array.map(item => {
-    body.tokens.push({
-      token_id: item.id,
-      price: item.price,
-      "platform": 0
-    })
-  })
-
-  const res = await fetch('/api/orders/sweep', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(body)
-  })
-  const data = await res.json()
-
-  try {
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const signer = provider.getSigner();
-
-    const transaction = {
-      to: data.address,
-      data: data.calldata,
-      value: data.value
-    };
-
-    const txResponse = await signer.sendTransaction(transaction);
-    const txReceipt = await txResponse.wait();
-    console.log('Transaction receipt:', txReceipt);
-  } catch (error) {
-    console.log(error);
-  }
-}
-
 const displayName = name => {
   if (!name) {
     return 'Anonymous'
@@ -125,11 +86,55 @@ export default function Collections() {
   const router = useRouter();
   const { id } = router.query;
   const [detail, setDetail] = useState({} as any);
-  const [address, setAddress] = useState("");
-  const [wallet, setWallet] = useState("");
+  const [address, setAddress] = useState<string>("");
   const [select, setSelect] = useState([]);
-  const [currentId, setCurrentId] = useState(id?.toString());
-  const [table, setTable] = useState([] as DataType[]);
+  const [table, setTable] = useState<DataType[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+
+  const wallet = useWalletAddress();
+
+  const postCollectionListings = async (address, array) => {
+    setLoading(true)
+    const body = {
+      contract_address: address,
+      tokens: []
+    };
+    array.map(item => {
+      body.tokens.push({
+        token_id: item.id,
+        price: item.price,
+        "platform": 0
+      })
+    })
+
+    const res = await fetch('/api/orders/sweep', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body)
+    })
+    const data = await res.json()
+
+    try {
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+
+      const transaction = {
+        to: data.address,
+        data: data.calldata,
+        value: data.value
+      };
+
+      const txResponse = await signer.sendTransaction(transaction);
+      const txReceipt = await txResponse.wait();
+      console.log('Transaction receipt:', txReceipt);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const rowSelection = {
     onChange: (selectedRowKeys: React.Key[], selectedRows: DataType[]) => {
@@ -141,32 +146,16 @@ export default function Collections() {
     }),
   };
 
-  const connectWallet = async () => {
-    if (window.ethereum) {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-
-      await window.ethereum.request({ method: 'eth_requestAccounts' });
-
-      const signer = provider.getSigner();
-      const address = await signer.getAddress();
-      setWallet(address);
-      console.log(`Connected to MetaMask wallet with address ${address}`);
-    } else {
-      console.log('MetaMask wallet not detected');
-    }
-  }
-
   useEffect(() => {
-    setCurrentId(id as string);
     async function fetchData() {
       const collection = await getCollectionDetail(id as string)
       setDetail(collection?.collection)
       if (collection?.collection) document.title = `${collection?.collection?.name} | kiwiswap`;
-      setAddress(collection?.collection.primary_asset_contracts[0].address as string)
+      setAddress(collection?.collection?.primary_asset_contracts[0]?.address as string)
 
       await sleep(1000);
 
-      const listing: any = await getCollectionListings(collection?.collection.primary_asset_contracts[0].address as string)
+      const listing: any = await getCollectionListings(collection?.collection?.primary_asset_contracts[0]?.address as string)
       const rawData: DataType[] = []
       if (listing?.orders) {
         listing?.orders.map((item: any) => {
@@ -192,9 +181,7 @@ export default function Collections() {
   return (
     <div className="w-11/12 m-auto">
       <div className="flex justify-end mb-3">
-        <Button type="primary" size="large"
-          onClick={() => connectWallet()}
-        >
+        <Button type="primary" size="large">
           {wallet ? displayName(wallet) : "Connect Your Wallet"}
         </Button>
       </div>
@@ -215,7 +202,7 @@ export default function Collections() {
 
       <div className="relative">
         <Table
-          className="bg-white mt-3"
+          className="mt-3"
           rowSelection={{
             type: "checkbox",
             ...rowSelection,
@@ -223,7 +210,7 @@ export default function Collections() {
           columns={columns}
           dataSource={table}
         />
-        <Button className="absolute bottom-3 left-3" type="primary" disabled={!select || select.length <= 0} size="large" onClick={() => postCollectionListings(address, select)}>
+        <Button loading={loading} className="absolute bottom-3 left-3" type="primary" disabled={!select || select.length <= 0} size="large" onClick={() => postCollectionListings(address, select)}>
           BUY
         </Button>
       </div>

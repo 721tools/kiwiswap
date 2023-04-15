@@ -1,8 +1,9 @@
 import { useRouter } from 'next/router'
 import { useState, useEffect } from 'react';
-import { Table, Avatar } from 'antd';
+import { Table, Descriptions, Card, Avatar, Skeleton, Button } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { ethers } from 'ethers';
+import useWalletAddress from '../../../hooks/useWalletAddress';
 
 interface DataType {
   key: React.Key;
@@ -36,8 +37,16 @@ export default function Wallet() {
   const { chain, addr } = router.query;
 
   const [select, setSelect] = useState([]);
-  const [address, setAddress] = useState("");
   const [table, setTable] = useState([] as DataType[]);
+
+  const wallet = useWalletAddress();
+
+  const displayName = name => {
+    if (!name) {
+      return 'Anonymous'
+    }
+    return name.substring(0, 4) + '...' + name.substring(name.length - 4)
+  }
 
   const rowSelection = {
     onChange: (selectedRowKeys: React.Key[], selectedRows: DataType[]) => {
@@ -50,7 +59,6 @@ export default function Wallet() {
   };
 
   useEffect(() => {
-    setAddress(addr as string);
     async function fetchData() {
       const assets: any = await getWalletAsset(addr as string)
 
@@ -67,13 +75,32 @@ export default function Wallet() {
       }
       setTable(rawData)
     }
-    addr && fetchData();
-  }, [addr]);
+    wallet && fetchData();
+  }, [wallet]);
 
   return (
     <div className="w-11/12 m-auto">
+      <div className="flex justify-end mb-3">
+        <Button type="primary" size="large">
+          {wallet ? displayName(wallet) : "Connect Your Wallet"}
+        </Button>
+      </div>
+      {wallet
+        ? <Card bordered={false}>
+          <Skeleton active />
+          {/* <Avatar
+            size={{ xs: 24, sm: 32, md: 40, lg: 64, xl: 80, xxl: 100 }}
+            src={detail?.image_url}
+          /> */}
+          {/* <Descriptions title={detail?.name}>
+            <Descriptions.Item label="Floor Price">{detail?.stats?.floor_price}</Descriptions.Item>
+          </Descriptions> */}
+        </Card>
+        : <div className="bg-white p-5">
+          <Skeleton active />
+        </div>}
       <Table
-        className="bg-white mt-5"
+        className="mt-5"
         rowSelection={{
           type: "checkbox",
           ...rowSelection,
