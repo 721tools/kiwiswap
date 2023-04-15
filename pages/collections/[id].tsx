@@ -49,28 +49,27 @@ const getCollectionListings = async (address: string) => {
 }
 
 const postCollectionListings = async (address, array) => {
-  const data = {
+  const body = {
     contract_address: address,
     tokens: []
   };
   array.map(item => {
-    data.tokens.push({
+    body.tokens.push({
       token_id: item.id,
       price: item.price,
       "platform": 0
     })
   })
 
-  fetch('/api/orders/sweep', {
+  const res = await fetch('/api/orders/sweep', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify(data)
+    body: JSON.stringify(body)
   })
-    .then(response => response.text())
-    .then(data => console.log(data))
-    .catch(error => console.error(error));
+  const data = await res.json()
+  console.log(data)
 }
 
 const formatTimestamp = (timestamp: string) => {
@@ -96,6 +95,7 @@ export default function Collections() {
   const { id } = router.query;
   const [detail, setDetail] = useState({});
   const [address, setAddress] = useState("");
+  const [wallet, setWallet] = useState("");
   const [select, setSelect] = useState([]);
   const [currentId, setCurrentId] = useState(id?.toString());
   const [table, setTable] = useState([] as DataType[]);
@@ -110,6 +110,22 @@ export default function Collections() {
       name: record.name,
     }),
   };
+
+  const connectWallet = async () => {
+    // Connect to the user's MetaMask wallet
+    if (window.ethereum) {
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      // Request access to the user's MetaMask account
+      await window.ethereum.request({ method: 'eth_requestAccounts' });
+      // Use the provider to interact with the blockchain
+      const signer = provider.getSigner();
+      const address = await signer.getAddress();
+      setWallet(address);
+      console.log(`Connected to MetaMask wallet with address ${address}`);
+    } else {
+      console.log('MetaMask wallet not detected');
+    }
+  }
 
   useEffect(() => {
     setCurrentId(id?.toString());
@@ -146,6 +162,12 @@ export default function Collections() {
 
   return (
     <div className="w-11/12 m-auto">
+      {/* <Button type="primary" size="large"
+        onClick={() => connectWallet()}
+      >
+        {wallet || "ConnectWallet"}
+      </Button> */}
+
       <Button type="primary" disabled={!select || select.length <= 0} size="large" onClick={() => postCollectionListings(address, select)}>
         BUY
       </Button>

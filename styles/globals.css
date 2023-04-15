@@ -30,3 +30,7 @@ body {
   overflow: auto;
   padding: 1rem 0;
 }
+
+button.ant-btn-primary {
+  background-color: #1677ff;
+}
